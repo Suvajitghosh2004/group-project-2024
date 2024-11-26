@@ -1,0 +1,44 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+
+}
+.student-show-one-job-details-main {
+    width: 100vw;
+    height: fit-content;
+    display: flex;
+    justify-content: space-evenly;
+    /* align-items: center; */
+    padding-top: 88px;
+    padding-bottom: 15px;
+}
+.student-show-one-job-details-left-box {
+    width: 30%;
+    height: 70%;
+    background-color: aquamarine;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #F3ECEA;
+    margin-top: 7%;
+}
+.job-details-oneByone {
+    color: black;
+    padding: 10px;
+}
+.student-show-one-job-details-right-box {
+    width: 50%;
+    min-height: 470px;
+    background-color:aquamarine;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #D9EEE1;
+}
+.job-descp-details {
+    color: black;
+}
