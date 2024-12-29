@@ -31,7 +31,7 @@ const StudentShowOneJob = () => {
           <p className='job-details-oneByone'><strong>Job Role:</strong> {job.jobRole}</p>
           <p className='job-details-oneByone'><strong>Job Location:</strong> {job.location}</p>
           <p className='job-details-oneByone'><strong>Salary:</strong> {job.salary}</p>
-          <p className='job-details-oneByone'><strong>Eligible:</strong> {job.eligble}</p>
+          <p className='job-details-oneByone'><strong>Eligible:</strong> {job.eligibility.join(', ')}</p>
           <p className='job-details-oneByone'><strong>Required Skills:</strong> {job.skills || 'Not specified'}</p>
           
         </div>

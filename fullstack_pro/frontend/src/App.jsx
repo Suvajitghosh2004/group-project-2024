@@ -22,6 +22,10 @@ import AddStudent from './page/teacherPages/AddStudent';
 import CreateAJob from './page/teacherPages/CreateAJob';
 import CreatedJob from './page/teacherPages/CreatedJob';
 import StudentShowOneJob from './page/studentPages/StudentShowOneJob';
+import TeacherHandleOwnJob from './page/teacherPages/TeacherHandleOwnJob';
+import ProtectedTeacherRouter from './routerProtector/ProtectedTeacherRouter';
+import ApplyJob from './page/studentPages/ApplyJob';
+import AppliedStudentList from './page/teacherPages/AppliedStudentList';
 
 
 function App() {
@@ -78,15 +82,24 @@ function App() {
         <Route path="my-job" element={<MyJobs />} />
         <Route path="applied-jobs" element={<AppliedJobs />} />
         <Route path='show-one-job/:id' element={<StudentShowOneJob/>}/>
+        <Route path="apply-job/:id" element={<ApplyJob/>} />
       </Route>
 
-      <Route path="/teacher-dashboard" element={<TeacherLayout />}>
+        <Route path="/teacher-dashboard" 
+          element={
+            <ProtectedTeacherRouter>
+               <TeacherLayout />
+            </ProtectedTeacherRouter>
+          }
+        >
         <Route index element={<AllJobs />} />
         <Route path='show-one-job/:id' element={<StudentShowOneJob/>}/>
-        <Route path="my-job" element={<CreatedJob />} />
-        <Route path="create-a-job" element={<CreateAJob />} />
+        <Route path="my-job" element={<CreatedJob/>} />
+        <Route path="create-a-job" element={<CreateAJob/>} />
         {/* Uncomment the route below if needed */}
         <Route path="add-student" element={<AddStudent />} />
+        <Route path="teacher-handle-own-job/:id" element={<TeacherHandleOwnJob />} />
+        <Route path="teacher-show-applied-student/:jobId" element={<AppliedStudentList />} />
       </Route>
 
     </Routes>

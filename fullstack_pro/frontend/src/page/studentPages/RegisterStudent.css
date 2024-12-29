@@ -6,7 +6,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 115vh;
+    height: 130vh;
     width: 100vw;
 }
 
@@ -15,7 +15,7 @@
     padding: 20px 40px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 450px;
+    width: 500px;
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -24,4 +24,7 @@
 
 #p-id{
     margin-top: 1rem;
+}
+.star {
+    color: red;
 }

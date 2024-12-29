@@ -27,7 +27,13 @@ const studentSchema = new Schema(
         studentStream : {
             type: String,
             required:true
-        }
+        },
+        "appliedJobs": [ // New field for job IDs
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Job', // Reference the 'Job' model if it exists
+            },
+        ],
 
     }
 )

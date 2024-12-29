@@ -3,7 +3,8 @@ import axios from "axios";
 import "./CreateJob.css";
 import jwt_decode from 'jwt-decode';
 const CreateAJob = () => {
-    const[creator,setCreator] = useState('aa');
+    const[creator,setCreator] = useState('');
+    const [error , setError] = useState(null);
 
     useEffect(() => {
       const token = localStorage.getItem("authToken");
@@ -15,7 +16,7 @@ const CreateAJob = () => {
               console.error("Invalid Token:", error);
           }
       }
-  }, []);
+    }, []);
 
   useEffect(() => {
       // Log the creator after it updates
@@ -91,9 +92,10 @@ const CreateAJob = () => {
             });
             console.log("Response:", response.data);
             alert("Job created successfully!");
-        } catch (error) {
-            console.error("Error submitting form:", error);
-            alert("Failed to create job. Please try again.");
+        } catch (err) {
+            alert(`${err.response?.data?.message}`);
+            setError(err.response?.data?.message);
+            
         }
     };
 
@@ -197,6 +199,17 @@ const CreateAJob = () => {
                                 </div>
 
                                 <div className="input-field">
+                                    <label htmlFor="LastDate">Last Date: </label>
+                                    <input
+                                        type="text"
+                                        id="LastDate"
+                                        value={formData.LastDate}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter Last date"
+                                    />
+                                </div>
+
+                                <div className="input-field">
                                     <label htmlFor="applyLink">Apply Link: </label>
                                     <input
                                         type="text"
@@ -223,6 +236,9 @@ const CreateAJob = () => {
                                 <button type="submit" className="addJob">
                                     Submit
                                 </button>
+                                <div className="error-message"> 
+                                    {error && <p >{error}</p>} {/* Display errors */}
+                                </div>
                             </div>
                             <p>{creator} aa</p>
                         </div>

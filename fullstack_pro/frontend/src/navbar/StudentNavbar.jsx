@@ -60,6 +60,7 @@ const StudentNavbar = () => {
             <NavLink
               to="/student-dashboard"
               className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
+              end
             >
               All Jobs
             </NavLink>
@@ -93,7 +94,7 @@ const StudentNavbar = () => {
               to="/place-student"
               className={({ isActive }) => (isActive ? "active-link-student-navbar" : '')}
             >
-              Place Student
+              Placed Student
             </NavLink>
           </li>
         </ul>

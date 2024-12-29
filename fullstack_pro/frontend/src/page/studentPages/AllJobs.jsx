@@ -5,16 +5,24 @@ import './AllJobs.css'
 export const AllJobs = () => {
   const [jobs, setJobs] = useState([])
   const [error, setError] = useState(null);
+  const [loading , setLoading] = useState(true)
   useEffect(() => {
     axios.get('api/job/alljobs')
       .then(response => {
         setJobs(response.data);
+        setLoading(false)
       })
       .catch((error) => {
         console.error(error);
         setError(error);
+        setLoading(false);
       })
   }, []);
+
+  if (loading) {
+    return <div className='loading'>Loading...</div>;
+  }
+
 
   return (
     <div>

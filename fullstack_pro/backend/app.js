@@ -11,7 +11,7 @@ import teacherRouter from './src/router/teacher.router.js'
 
 app.use('/api/student',studentRouter)
 app.use('/api/job',jobRouter);
-app.use('api/student',studentRouter)
+app.use('/api/student',studentRouter)
 app.use('/api/teacher',teacherRouter);
 
 export default app;

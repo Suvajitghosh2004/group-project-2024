@@ -17,8 +17,9 @@ const StudentLogin = () => {
       const response = await axios.post("/api/student/login", {
         studentMail,
         studentPassword,
-      });
-
+      })
+      
+     
       if (response.data.token) {      
         if (response.data.role === "student") {
           localStorage.setItem("authToken", response.data.token);
@@ -31,7 +32,7 @@ const StudentLogin = () => {
       }
     } catch (err) {
       const message =
-        err.response?.data?.message || "An error occurred during login.";
+        err.response?.data?.error || "An error occurred during login.";
       setError(message);
     }
   };
@@ -67,10 +68,13 @@ const StudentLogin = () => {
               required
             />
           </div>
-          {error && <p className="error-message">{error}</p>} {/* Display errors */}
+          
           <button type="submit" className="btn">
             Login
           </button>
+          <div className="error-message"> 
+            {error && <p >{error}</p>} {/* Display errors */}
+          </div>
         </form>
         <p>
           New here?{" "}

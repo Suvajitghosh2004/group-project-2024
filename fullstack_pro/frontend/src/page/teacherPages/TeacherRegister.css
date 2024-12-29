@@ -10,10 +10,18 @@
     padding: 20px 40px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 400px;
+    width: 500px;
     height: fit-content;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
+}
+#email ,#password{
+    width: 450px;
+}
+.error-message {
+    margin-top: 10px;
+    color: red;
+    text-align: center;
 }

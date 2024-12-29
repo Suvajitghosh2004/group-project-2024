@@ -8,6 +8,7 @@ const CreatedJob = () => {
   const [error, setError] = useState('');
   const [jobs, setJobs] = useState([]);
   const [creator, setCreator] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Decode token and set creator
   useEffect(() => {
@@ -32,17 +33,23 @@ const CreatedJob = () => {
         .get(`/api/job/teacher-own-job/${creator}`)
         .then((response) => {
           setJobs(response.data);
+          setLoading(false)
         })
         .catch((err) => {
-          setError('Failed to fetch jobs. Please try again later.');
+          setLoading(false);
+          setError(err.response?.data?.message);
           console.error("Error fetching jobs:", err);
         });
     }
   }, [creator]);
 
+  if (loading) {
+    return <div className='loading'>Loading...</div>;
+  }
+
   return (
-    <div>
-      <h1 style={{ textAlign: "center" }}>All Jobs</h1>
+    <div className='createdJob-main'>
+      <div className="createdJob-under-main">
       {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
       <div className="all-job">
         <div className="jobs">
@@ -51,9 +58,10 @@ const CreatedJob = () => {
               <CreatedJobFormteTeacher job={job} key={job._id} />
             ))
           ) : (
-            !error && <p style={{ textAlign: "center" }}>No jobs available.</p>
+            !error && <div className='nojob'><p style={{ textAlign: "center" }}>No jobs available.</p></div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

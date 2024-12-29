@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import './TeacherRegister.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const TeacherRegister = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -8,7 +10,8 @@ const TeacherRegister = () => {
     password: "",
     confirmPassword: "",
   });
-
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -17,19 +20,36 @@ const TeacherRegister = () => {
       alert("Passwords do not match!");
       return;
     }
-
+    try {
+      axios.post('/api/teacher/register',{
+        teacherName:formData.name,
+        teacherMail:formData.email,
+        teacherDepatment:formData.department,
+        teacherPassword: formData.confirmPassword
+      })
+      .then((response) => {
+        if (response.status === 200 || response.status === 201) {
+          alert("Student Registered Successfully");
+          console.log(response.data);
+          setFormData({
+            name: "",
+            email: "",
+            department: "",
+            password: "",
+            confirmPassword: "",
+          });
+          navigate("/teacher-login"); // Redirect after successful registration
+        } else {
+          setError(`Unexpected response: ${response.status} - ${response.data}`);
+        }
+      })
+      
+    } catch (error) {
+      setError(error);
+    }
     // Log data for testing (Replace with actual API call)
     console.log("Teacher Registration Details:", formData);
 
-    // Reset form fields
-    alert("Registration successful!");
-    setFormData({
-      name: "",
-      email: "",
-      department: "",
-      password: "",
-      confirmPassword: "",
-    });
   };
 
   return (
@@ -90,7 +110,7 @@ const TeacherRegister = () => {
           <div className="form-group">
             <label htmlFor="confirmPassword">Confirm Password:</label>
             <input
-              type="password"
+              type="text"
               id="confirmPassword"
               placeholder="Re-Enter Your Password"
               value={formData.confirmPassword}

@@ -13,39 +13,39 @@ const TeacherLogin = () => {
         setError(null);
 
         try {
-          const response = await axios.post('/api/teacher/login',{
+            const response = await axios.post('/api/teacher/login', {
                 teacherMail,
                 teacherPassword
             });
-            if(response.data.token){
-                if(response.data.role == "teacher"){
+            if (response.data.token) {
+                if (response.data.role == "teacher") {
                     localStorage.setItem('authToken', response.data.token);
                     alert("Login successful!");
                     navigate('/teacher-dashboard');
-                }else{
+                } else {
                     setError("Invalid Access , you are not a teacher");
                 }
-            }else {
+            } else {
                 setError("Invalid credentials. Please try again.");
             }
 
         } catch (error) {
             const message =
-        err.response?.data?.message || "An error occurred during login.";
-        setError(message);
+                error.response?.data?.message || "An error occurred during login.";
+            setError(message);
         }
 
         // Log data for testing (Replace with actual API call)
-        console.log("Teacher Login Details:", { email, password });
+        console.log("Teacher Login Details:", { teacherMail, teacherPassword });
 
         // Reset form fields
-        
-        
+
+
     };
 
     return (
         <div className="teacher-login-main">
-            {error && <p className="error-message">{error}</p>} {/* Display errors */}
+
             <div className="form-container">
                 <h1>Teacher Login</h1>
                 <form onSubmit={handleSubmit}>
@@ -72,8 +72,10 @@ const TeacherLogin = () => {
                         />
                     </div>
                     <button type="submit" className="btn">Login</button>
+                    <div className="error-message"> {error && <p >{error}</p>} {/* Display errors */}
+                    </div>
                 </form>
-                
+
             </div>
         </div>
 

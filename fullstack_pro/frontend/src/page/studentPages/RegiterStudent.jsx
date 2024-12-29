@@ -5,6 +5,7 @@ import axios from "axios";
 
 const StudentRegister = () => {
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [details, setDetails] = useState({
     studentName: "",
     studentMail: "",
@@ -21,6 +22,8 @@ const StudentRegister = () => {
     navigate("/student-login");
   };
 
+  const validateContactNumber = (number) => /^[0-9]{10}$/.test(number);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -29,7 +32,18 @@ const StudentRegister = () => {
       return;
     }
 
+    if (!validateContactNumber(details.contactNumber)) {
+      setError("Contact number must be a 10-digit number.");
+      return;
+    }
+
+    if (!details.studentStream || details.studentStream === "Select Stream") {
+      setError("Please select a valid stream.");
+      return;
+    }
+
     try {
+      setLoading(true);
       const response = await axios.post("/api/student/register", {
         studentName: details.studentName,
         studentMail: details.studentMail,
@@ -41,21 +55,22 @@ const StudentRegister = () => {
 
       if (response.status === 200 || response.status === 201) {
         alert("Student Registered Successfully");
-        console.log(response.data);
         navigate("/student-login"); // Redirect after successful registration
       } else {
-        setError(`Unexpected response: ${response.status} - ${response.data}`);
+        setError(`Unexpected response: ${response.status}`);
       }
     } catch (err) {
-      // Extract a more specific error message if possible
       const message =
         err.response?.data?.message ||
         "An error occurred during registration. Please try again.";
       setError(message);
-      alert(`${error}`)
       console.error("Registration Error:", err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const streams = ["Select Stream", "BCA", "MCA", "MBA", "BBA", "AI&ML"];
 
   return (
     <div className="main-register-student">
@@ -63,7 +78,9 @@ const StudentRegister = () => {
         <h1>Student Register</h1>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="studentName">Name:</label>
+            <label htmlFor="studentName">
+              Name:<span className="star">*</span>
+            </label>
             <input
               type="text"
               id="studentName"
@@ -76,7 +93,9 @@ const StudentRegister = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="studentCode">Student Code:</label>
+            <label htmlFor="studentCode">
+              Student Code:<span className="star">*</span>
+            </label>
             <input
               type="text"
               id="studentCode"
@@ -84,12 +103,14 @@ const StudentRegister = () => {
               onChange={(e) =>
                 setDetails({ ...details, studentCode: e.target.value })
               }
-              placeholder="Enter Your Full Student Code"
+              placeholder="Enter Your Student Code"
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="contactNumber">Contact Number:</label>
+            <label htmlFor="contactNumber">
+              Contact Number:<span className="star">*</span>
+            </label>
             <input
               type="text"
               id="contactNumber"
@@ -102,20 +123,28 @@ const StudentRegister = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="studentStream">Stream:</label>
-            <input
-              type="text"
+            <label htmlFor="studentStream">
+              Stream:<span className="star">*</span>
+            </label>
+            <select
               id="studentStream"
               value={details.studentStream}
               onChange={(e) =>
                 setDetails({ ...details, studentStream: e.target.value })
               }
-              placeholder="Enter Your Stream"
               required
-            />
+            >
+              {streams.map((stream, index) => (
+                <option key={index} value={stream}>
+                  {stream}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
-            <label htmlFor="studentMail">Email:</label>
+            <label htmlFor="studentMail">
+              Email:<span className="star">*</span>
+            </label>
             <input
               type="email"
               id="studentMail"
@@ -128,7 +157,9 @@ const StudentRegister = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password:</label>
+            <label htmlFor="password">
+              Password:<span className="star">*</span>
+            </label>
             <input
               type="password"
               id="password"
@@ -141,7 +172,9 @@ const StudentRegister = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password:</label>
+            <label htmlFor="confirmPassword">
+              Confirm Password:<span className="star">*</span>
+            </label>
             <input
               type="password"
               id="confirmPassword"
@@ -153,9 +186,9 @@ const StudentRegister = () => {
               required
             />
           </div>
-          {error && <p className="error-message">{error}</p>} {/* Display errors here */}
-          <button type="submit" className="btn">
-            Register
+          {error && <p className="error-message">{error}</p>}
+          <button type="submit" className="btn" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
         <p id="p-id">

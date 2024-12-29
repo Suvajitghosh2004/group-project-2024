@@ -26,7 +26,7 @@ const jobSchema = new Schema (
         "description":{
             type:String,
         },
-        "appyLink":{
+        "applyLink":{
             type:String
         },
         "eligibility": {

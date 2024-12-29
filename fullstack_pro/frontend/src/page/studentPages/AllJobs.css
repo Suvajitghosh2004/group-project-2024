@@ -4,7 +4,11 @@
   flex-wrap: wrap; /* Ensures items wrap if they overflow */
   gap: 20px; /* Adds space between items */
   justify-content: center; /* Centers the rows horizontally */
-  background-color: black;
+ background-color: wheat;
+  min-height: 100vh;
+
+  
+
 }
 
 .jobs {
@@ -49,4 +53,12 @@ h1 {
 p {
   font-size: 1.2rem;
   
+}
+.loading{
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
 }

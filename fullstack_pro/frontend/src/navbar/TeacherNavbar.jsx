@@ -51,82 +51,74 @@ const TeacherNavbar = () => {
 
   return (
     <nav className="navbar-student">
-      {/* Left Section: Links */}
+  {/* Left Section: Links */}
+  <div className="welcome-text">
+    <p id="Welcome-para">Welcome</p>
+    <span className="username">{teacherName}</span>
+  </div>
+  
+  <div className="student-navber-links">
+    <ul className="nav-links-student">
+      <li>
+        <NavLink
+          to="/teacher-dashboard"
+          className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
+          end
+        >
+          All Jobs
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/teacher-dashboard/my-job"
+          className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
+        >
+          My Jobs
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/teacher-dashboard/add-student"
+          className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
+        >
+          Add Student
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/teacher-dashboard/create-a-job"
+          className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
+        >
+          Create a Job
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/place-student"
+          className={({ isActive }) => (isActive ? "active-link-student-navbar" : '')}
+        >
+          Announcements
+        </NavLink>
+      </li>
+    </ul>
 
-      <div className="welcome-text">
-        <p id="Welcome-para">Welcome</p>
-        <span className="username">{teacherName}</span>
+    <div className="profile-contanier">
+      <div className="profile-icon" onClick={handleProfileClick}>
+        <p className="profile">{profileIcon}</p>
       </div>
-      <div className="student-navber-links">
-        <ul className="nav-links-student">
-          <li>
-            <NavLink
-              to="/teacher-dashboard"
-              className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
-            >
-              All Jobs
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/teacher-dashboard/my-job"
-              className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
-            >
-              My Jobs
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/teacher-dashboard/add-student"
-              className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
-            >
-              Add Student
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/teacher-dashboard/create-a-job"
-              className={({ isActive }) => (isActive ? "active-link-student-navbar" : "")}
-            >
-              Create a job
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/place-student"
-              className={({ isActive }) => (isActive ? "active-link-student-navbar" : '')}
-            >
-              Announcements
-            </NavLink>
-          </li>
-        </ul>
-        <div className="profile-contanier">
-          <div className="profile-icon" onClick={handleProfileClick}>
-            {/* <img
-            src="https://via.placeholder.com/40"
-            alt="Profile Icon"
-          /> */}
 
-            <p className="profile">{profileIcon}</p>
-          </div>
-        
-        {showDropDown && (
-          <div className="drop-down-menu">
-            <p>Name : {teacherName}</p>
-            <p>Department : {stream} </p>
-            <button onClick={logout}>Logout</button>
+      {showDropDown && (
+        <div className="drop-down-menu">
+          <p>Name : {teacherName}</p>
+          <p>Department : {stream} </p>
+          <button onClick={logout}>Logout</button>
+        </div>
+      )}
+    </div>
+  </div>
+  {/* Right Section: Profile Icon and Welcome Text */}
+</nav>
 
-          </div>
-        )}
-      </div>
-      </div>
-      {/* Right Section: Profile Icon and Welcome Text */}
-
-
-
-
-
-    </nav >
   );
 };
 

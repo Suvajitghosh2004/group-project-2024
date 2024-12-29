@@ -1,5 +1,6 @@
 import { trusted } from "mongoose";
 import Student from "../models/student.model.js";
+import Job from "../models/job.model.js";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
@@ -52,7 +53,7 @@ const loginStudent = async (req, res) => {
   try {
     const user = await Student.findOne({ studentMail });
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(401).json({ error: 'User not found!' });
     }
 
     const isPasswordValid = await bcrypt.compare(studentPassword, user.password);
@@ -161,6 +162,111 @@ try {
   res.status(500).json({ error: 'Internal server error!' });
 }
 */ 
-  
 
-export {registerStudent,loginStudent};
+// const pushAppliedJob = async (req, res) => {
+//   try {
+//       const { jobId, studentId } = req.body;
+
+//       // Validate request body
+//       if (!jobId || !studentId) {
+//           return res.status(400).json({ error: "jobId and studentId are required." });
+//       }
+
+//       // Find the student
+//       const student = await Student.findById(studentId);
+//       if (!student) {
+//           return res.status(404).json({ error: "Student not found." });
+//       }
+
+//       // Check if the jobId already exists in appliedJobs
+//       if (student.appliedJobs.includes(jobId)) {
+//           return res.status(400).json({ error: "Job already applied." });
+//       }
+
+//       // Push the jobId to appliedJobs array
+//       student.appliedJobs.push(jobId);
+
+//       // Save the updated student document
+//       await student.save();
+
+//       res.status(200).json({ message: "Job applied successfully." });
+//   } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ error: "Internal server error." });
+//   }
+// };
+
+
+const applyForJob = async (req, res) => {
+    try {
+        const { jobId, studentId } = req.body;
+
+        // Validate input
+        if (!jobId || !studentId) {
+            return res.status(400).json({ error: "jobId and studentId are required." });
+        }
+
+        // Find the job
+        const job = await Job.findById(jobId);
+        if (!job) {
+            return res.status(404).json({ error: "Job not found." });
+        }
+
+        // Find the student
+        const student = await Student.findById(studentId);
+        if (!student) {
+            return res.status(404).json({ error: "Student not found." });
+        }
+
+        // Check if the student has already applied for this job
+        if (job.appliedStudent.includes(studentId)) {
+            return res.status(400).json({ error: "Student has already applied for this job." });
+        }
+
+        // Add the student to the job's `studentsApplied` array
+        job.appliedStudent.push(studentId);
+        await job.save();
+
+        // Optional: Add the job to the student's `appliedJobs` array
+        if (!student.appliedJobs.includes(jobId)) {
+            student.appliedJobs.push(jobId);
+            await student.save();
+        }
+
+        res.status(200).json({ message: "Application submitted successfully." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+
+const getAppliedJobs = async (req, res) => {
+  try {
+      const { studentId } = req.body;
+
+      // Validate request parameter
+      if (!studentId) {
+          return res.status(400).json({ error: "Student ID is required." });
+      }
+
+      // Find the student and populate the appliedJobs field
+      const student = await Student.findById(studentId).populate('appliedJobs');
+
+      if (!student) {
+          return res.status(404).json({ error: "Student not found." });
+      }
+
+      // Return the list of applied jobs
+      res.status(200).json({
+          studentName: student.studentName,
+          studentMail: student.studentMail,
+          appliedJobs: student.appliedJobs,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
+export {registerStudent,loginStudent,applyForJob,getAppliedJobs};
