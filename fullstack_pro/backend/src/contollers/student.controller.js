@@ -268,5 +268,17 @@ const getAppliedJobs = async (req, res) => {
   }
 };
 
+const getStudentDetails = async (req, res) => {
+  const { studentIds } = req.body;
 
-export {registerStudent,loginStudent,applyForJob,getAppliedJobs};
+  try {
+      const students = await Student.find({ '_id': { $in: studentIds } });
+      res.json(students);
+  } catch (error) {
+      console.error("Error fetching student details:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export {registerStudent,loginStudent,applyForJob,getAppliedJobs,getStudentDetails};
