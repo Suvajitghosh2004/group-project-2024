@@ -1,31 +1,99 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import './AppliedStudentList.css'; // Import the CSS file
+import './AppliedStudentList.css';
 
 const AppliedStudentList = () => {
   const { jobId } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [appliedStudents, setAppliedStudents] = useState([]);
+  const [selectedRound, setSelectedRound] = useState('appliedStudent');
+  const [trackDetails, setTrackDetails] = useState(null);
+  const [roundName, setRoundName] = useState("Applied Student List"); 
+  // Fetch Job Details
   useEffect(() => {
-    axios
-      .get(`/api/job/applied-student-list/${jobId}`)
-      .then((response) => {
+    const fetchJobDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/job/applied-student-list/${jobId}`);
         setJob(response.data);
+        setAppliedStudents(response.data?.appliedStudent || []);
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch job details. Please try again later.');
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+      }
+    };
+    fetchJobDetails();
   }, [jobId]);
 
+  // Fetch Track Details
+  useEffect(() => {
+    let isMounted = true;
+    const fetchTrackDetails = async () => {
+      try {
+        const response = await axios.post('/api/track/job/job-track', { jobDetails: jobId });
+        if (isMounted && response.status === 200) {
+          setTrackDetails(response.data.jobTrack);
+          // console.log(response.data.jobTrack)
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) setError('Failed to fetch track details. Please try again later.');
+      }
+    };
+    if (jobId) fetchTrackDetails();
+    return () => {
+      isMounted = false;
+    };
+  }, [jobId]);
+
+  // Handle Round Selection
+  const handleRoundChange = (event) => {
+    const round = event.target.value;
+    setSelectedRound(round);
+  };
+
+  // Update Students List Based on Selected Round
+  useEffect(() => {
+    if (selectedRound === 'appliedStudent') {
+      setAppliedStudents(job?.appliedStudent || []);
+      setRoundName("Applied Student List");
+    } else if (trackDetails && trackDetails[selectedRound]) {
+      setAppliedStudents(trackDetails[selectedRound] || []);
+    } else {
+      setAppliedStudents([]);
+    }
+    if(selectedRound == "resumeSelect"){
+      setRoundName("Resume selceted Student List");
+    }else if(selectedRound  == "firstRound"){
+      setRoundName("First Round Student List");
+    }else if(selectedRound  == "secondRound"){
+      setRoundName("Second Round Student List");
+    } else if(selectedRound  == "thirdRound"){
+      setRoundName("Third Round Student List");
+    } else if(selectedRound  == "finalRound"){
+      setRoundName("Final Round Student List");
+    } else if(selectedRound == "fourthRound"){
+      setRoundName("Fourth Round Student List");
+    }
+  }, [selectedRound, trackDetails, job]);
+
+  // Retry Fetching Data
+  const retryFetchingData = () => {
+    setError(null);
+    setLoading(true);
+    setJob(null);
+    setTrackDetails(null);
+  };
+
+  // Download CSV
   const downloadCSV = () => {
     if (!job) return;
 
-    // Add Job Details as part of the CSV content
     const jobDetails = [
       ['Company Name', job.companyName],
       ['Job Role', job.jobRole],
@@ -38,28 +106,22 @@ const AppliedStudentList = () => {
 
     const jobDetailsCsv = jobDetails.map((detail) => detail.join(': ')).join('\n');
 
-    // Add Applied Students data
     const headers = ['Student Code', 'Name', 'Stream', 'Contact Number'];
-    const rows = job.appliedStudent
-      ? job.appliedStudent.map((student) => [
-          student.studentCode,
-          student.studentName,
-          student.studentStream,
-          student.contactNumber,
-        ])
-      : [];
+    const rows = appliedStudents.map((student) => [
+      student.studentCode,
+      student.studentName,
+      student.studentStream,
+      student.contactNumber,
+    ]);
+
     const studentDataCsv = [
-      headers.join(','), // Add headers
-      ...rows.map((row) => row.join(',')), // Add rows
+      headers.join(','),
+      ...rows.map((row) => row.join(',')),
     ].join('\n');
 
-    // Combine Job Details and Student Data
-    const csvContent = `${jobDetailsCsv}\n\nApplied Students:\n${studentDataCsv}`;
-
-    // Generate Dynamic File Name
+    const csvContent = `${jobDetailsCsv}\n\n${roundName}:\n\n${studentDataCsv}`;
     const fileName = `${job.companyName.replace(/\s+/g, '_')}_${job.jobRole.replace(/\s+/g, '_')}.csv`;
 
-    // Create Blob and Trigger Download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
 
@@ -68,22 +130,32 @@ const AppliedStudentList = () => {
     link.setAttribute('download', fileName);
     link.click();
 
-    // Clean up
     URL.revokeObjectURL(url);
   };
 
+  // Render Loading State
   if (loading) {
     return <div className="applied-student-list__loading">Loading...</div>;
   }
 
+  // Render Error State
   if (error) {
-    return <div className="applied-student-list__error">Error: {error}</div>;
+    return (
+      <div className="applied-student-list__error">
+        <p>{error}</p>
+        <button onClick={retryFetchingData} className="applied-student-list__retry-button">
+          Retry
+        </button>
+      </div>
+    );
   }
 
+  // Render No Job Details
   if (!job) {
     return <div className="applied-student-list__error">No job details available.</div>;
   }
 
+  // Main Component UI
   return (
     <div className="applied-student-list">
       <h1 className="applied-student-list__header">Job Details</h1>
@@ -106,18 +178,36 @@ const AppliedStudentList = () => {
           </a>
         </p>
       </div>
-    <div>
-      <h2 className="applied-student-list__sub-header">Applied Students
-        <button
-          onClick={downloadCSV}
-          className="applied-student-list__download-button"
-        >
-          Download CSV
-        </button>
-     
-      </h2>
+      <div>
+        <div className="applied-student-list__header-container">
+          <div className="applied-student-list__dropdown">
+            <label htmlFor="roundSelect"><p className='ss'>Select Round:</p></label>
+            <select
+              id="roundSelect"
+              value={selectedRound}
+              onChange={handleRoundChange}
+              className="applied-student-list__select"
+            >
+              <option value="appliedStudent">Applied Student</option>
+              {trackDetails?.resumeRoundCompleted && <option value="resumeSelect">Resume Round</option>}
+              {trackDetails?.firstRoundCompleted && <option value="firstRound">First Round</option>}
+              {trackDetails?.secondRoundCompleted && <option value="secondRound">Second Round</option>}
+              {trackDetails?.thirdRoundCompleted && <option value="thirdRound">Third Round</option>}
+              {trackDetails?.fourthRoundCompleted && <option value="fourthRound">Fourth Round</option>}
+              {trackDetails?.finalRoundCompleted && <option value="finalRound">Final Round</option>}
+            </select>
+          </div>
+           <p className='roundName'>{roundName}</p>
+          <button
+            onClick={downloadCSV}
+            className="applied-student-list__download-button"
+          >
+            Download CSV
+          </button>
+        </div>
+
       </div>
-      {job.appliedStudent && job.appliedStudent.length > 0 ? (
+      {appliedStudents && appliedStudents.length > 0 ? (
         <table className="applied-student-list__table">
           <thead>
             <tr>
@@ -128,7 +218,7 @@ const AppliedStudentList = () => {
             </tr>
           </thead>
           <tbody>
-            {job.appliedStudent.map((student) => (
+            {appliedStudents.map((student) => (
               <tr key={student._id}>
                 <td>{student.studentCode}</td>
                 <td>{student.studentName}</td>
@@ -137,6 +227,7 @@ const AppliedStudentList = () => {
               </tr>
             ))}
           </tbody>
+
         </table>
       ) : (
         <p className="applied-student-list__info">No students have applied for this job yet.</p>

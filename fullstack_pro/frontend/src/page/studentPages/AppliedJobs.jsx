@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useState } from 'react';
 import jwt_decode from 'jwt-decode';
-import AllJobsFormate from '../../component/AllJobsFormate';
+
+import AppliedJobTrackFromate from '../../component/AppliedJobTrackFromate';
 const AppliedJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [studentId , setStudentId] = useState('');
@@ -49,7 +50,7 @@ const AppliedJobs = () => {
         <div className="jobs">
           {jobs.length > 0 ? (
             jobs.map((job) => (
-              <AllJobsFormate job={job} key={job._id} />
+              <AppliedJobTrackFromate job={job} key={job._id} />
             ))
           ) : (
             <p>No jobs available.</p>

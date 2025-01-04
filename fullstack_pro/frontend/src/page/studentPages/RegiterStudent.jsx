@@ -46,8 +46,8 @@ const StudentRegister = () => {
       setLoading(true);
       const response = await axios.post("/api/student/register", {
         studentName: details.studentName,
-        studentMail: details.studentMail,
-        studentCode: details.studentCode,
+        studentMail: details.studentMail.toLowerCase(),
+        studentCode: details.studentCode.toLowerCase(),
         contactNumber: details.contactNumber,
         studentStream: details.studentStream,
         password: details.password,

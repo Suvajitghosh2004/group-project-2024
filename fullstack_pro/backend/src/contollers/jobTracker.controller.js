@@ -167,9 +167,79 @@ const trackOneStudent = async (req,res) => {
 
 }
 
+const trackOneJob = async (req, res) => {
+    const { studentId, jobDetails } = req.body;
+
+    // Validate input
+    if (!studentId || !jobDetails) {
+        return res.status(400).json({ message: "Please provide both studentId and jobDetails" });
+    }
+
+    try {
+        // Check if job tracker exists
+        const jobTrack = await JobTracker.findOne({ jobDetails });
+        if (!jobTrack) {
+            return res.status(404).json({ message: "Job tracker not available" });
+        }
+
+        // Prepare response data
+        const studentInRounds = {
+            resumeSelect: jobTrack.resumeSelect?.includes(studentId) || false,
+            resumeRoundCompleted: jobTrack.resumeRoundCompleted || false,
+            firstRound: jobTrack.firstRound?.includes(studentId) || false,
+            firstRoundCompleted: jobTrack.firstRoundCompleted || false,
+            secondRound: jobTrack.secondRound?.includes(studentId) || false,
+            secondRoundCompleted: jobTrack.secondRoundCompleted || false,
+            thirdRound: jobTrack.thirdRound?.includes(studentId) || false,
+            thirdRoundCompleted: jobTrack.thirdRoundCompleted || false,
+            fourthRound: jobTrack.fourthRound?.includes(studentId) || false,
+            fourthRoundCompleted: jobTrack.fourthRoundCompleted || false,
+            finalRound: jobTrack.finalRound?.includes(studentId) || false,
+            finalRoundCompleted: jobTrack.finalRoundCompleted || false,
+        };
+
+        return res.status(200).json({ studentInRounds });
+    } catch (error) {
+        console.error("Error in trackOneJob:", error.message);
+
+        // Handle specific errors if needed
+        if (error.name === "ValidationError") {
+            return res.status(400).json({ message: "Validation error occurred" });
+        }
+
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+const trackJob = async (req, res) => {
+    const { jobDetails } = req.body;
+    // Validate input
+    if (!jobDetails) {
+        return res.status(400).json({ message: "Please provide jobDetails" });
+    }
+    try {
+         const jobTrack = await JobTracker.findOne({ jobDetails })
+            .populate('resumeSelect')
+            .populate('firstRound')
+            .populate('secondRound')
+            .populate('thirdRound')
+            .populate('fourthRound')
+            .populate('finalRound');
+         if (!jobTrack) {
+            return res.status(404).json({ message: "Job tracker not available" });
+         }
+         return res.status(200).json({jobTrack});
+
+    }catch (error) {
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 export{
     selectRound,
     getJobTrackerDetails,
     createJobTrackor,
-    trackOneStudent
+    trackOneStudent,
+    trackOneJob,
+    trackJob
 }

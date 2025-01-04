@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { NavLink } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 //import "./StudentNavbar.css";
@@ -12,7 +12,7 @@ const TeacherNavbar = () => {
   const [showDropDown, setDropDown] = useState(false);
   const [stream, setStream] = useState('');
   //const [studentCode, setStudentCode] = useState('');
-
+  const profileRef = useRef(null)
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -48,6 +48,18 @@ const TeacherNavbar = () => {
     localStorage.removeItem('authToken');
     navigate('/');
   }
+
+  useEffect(() => {
+      function handleClickOutside(event) {
+        if (profileRef.current && !profileRef.current.contains(event.target)) {
+          setDropDown(false);
+        }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
 
   return (
     <nav className="navbar-student">
@@ -102,7 +114,7 @@ const TeacherNavbar = () => {
       </li>
     </ul>
 
-    <div className="profile-contanier">
+    <div className="profile-contanier" ref={profileRef}>
       <div className="profile-icon" onClick={handleProfileClick}>
         <p className="profile">{profileIcon}</p>
       </div>
