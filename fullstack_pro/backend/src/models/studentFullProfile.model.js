@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const studentFullProfileSchema = new Schema(
     {
-        "studentDeatils":{
+        "studentDetails":{
             type:mongoose.Types.ObjectId,
             ref:"Student"
         },

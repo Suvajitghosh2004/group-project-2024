@@ -1,9 +1,11 @@
 import express from 'express'
 import cors from 'cors';
+import bodyParser from 'body-parser';
 const app = express()
 
 app.use(cors({ origin: 'http://localhost:5173' })); 
 app.use(express.json());
+app.use(bodyParser.json());
 
 import jobRouter from './src/router/job.router.js'
 import studentRouter from './src/router/student.router.js'

@@ -1,15 +1,28 @@
 import { Router } from "express";
 const router = Router();
 import { registerStudent,loginStudent,applyForJob,getAppliedJobs ,getStudentDetails} from "../contollers/student.controller.js";
-
+import {createStudentFullProfile,getOneStudentFullProfile,updateStudentFullProfile} from '../contollers/studentFullProfile.controller.js'
 //router.get('/login', (req,res) =>{
    // res.send("welcome to student login page");
 //})
+import {upload} from '../middleware/multer.middleware.js'
 
 router.post('/register',registerStudent);
 router.post('/login',loginStudent);
 router.post('/store/student-applied-job',applyForJob);
 router.post('/get/applied-jobs',getAppliedJobs);
 router.post('/track/details',getStudentDetails);
+router.post('/create/student-full-profile',createStudentFullProfile);
+router.post('/get/one-student-full-profile',getOneStudentFullProfile);
+router.route('/update/student-full-profile').post(
+   upload.fields([
+       { name: "cv", maxCount: 1 },
+   ]),
+   (req, res, next) => {
+       next();
+   },
+   updateStudentFullProfile
+);
+
 
 export default router;
