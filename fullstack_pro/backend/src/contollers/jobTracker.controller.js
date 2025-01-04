@@ -1,5 +1,5 @@
 import JobTracker from "../models/jobTraker.model.js";
-
+import Student from "../models/student.model.js"
 
 const selectRound = async (req, res) => {
     const { roundName, studentIds, jobTrackerId } = req.body;
@@ -59,36 +59,9 @@ const selectRound = async (req, res) => {
             jobTracker.fourthRoundCompleted = true;
         }
 
-        // // Clear IDs from all subsequent rounds after the updated round
-        // const nextRoundIndex = validRounds.indexOf(roundName) + 1;
-        // for (let i = nextRoundIndex; i < validRounds.length; i++) {
-        //     jobTracker[validRounds[i]] = [];
-        // }
-
-        // // Define the rounds to check (from resumeSelect to fourthRound)
-        // const checkRounds = [
-        //     "resumeSelect",
-        //     "firstRound",
-        //     "secondRound",
-        //     "thirdRound",
-        //     "fourthRound"
-        // ];
-
-        // // Check each round (resumeSelect to fourthRound) for empty studentIds
-        // checkRounds.forEach(round => {
-        //     if (jobTracker[round].length === 0) {
-        //         // Set the corresponding round tracker to false if the array is empty
-        //         const roundCompletedFlag = `${round}Completed`;
-        //         jobTracker[roundCompletedFlag] = false;
-        //     } else {
-        //         // Set the corresponding round tracker to true if the array is not empty
-        //         const roundCompletedFlag = `${round}Completed`;
-        //         jobTracker[roundCompletedFlag] = true;
-        //     }
-        // });
-
-        
-
+        if(roundName == "finalRound"){
+            jobTracker.finalRoundCompleted = true;
+        }
         // Save the updated JobTracker document
         await jobTracker.save();
 
@@ -101,9 +74,6 @@ const selectRound = async (req, res) => {
         return res.status(500).json({ message: "Internal server error." });
     }
 };
-
-
-
 
 
 const getJobTrackerDetails = async (req, res) => {
@@ -145,4 +115,61 @@ const createJobTrackor  = async (req, res) => {
     }
 }
 
-export{selectRound,getJobTrackerDetails,createJobTrackor}
+
+const trackOneStudent = async (req,res) => {
+    const {studentCode} = req.body;
+
+    try {
+        const student = await Student.findOne({studentCode}).exec();
+        if(!student){
+            return res.status(300).json({message:"Student not found please enter correct student code"})
+        }
+
+        const appliedJobs = student.appliedJobs || [];
+        const studentId = student._id;
+       // res.status(200).json(appliedJobs);
+
+        const jobTrack = await JobTracker.find({jobDetails : {$in : appliedJobs}}).populate("jobDetails");
+
+        const result = jobTrack.map((job) => {
+            const studentInRounds = {
+                resumeSelect : job.resumeSelect.includes(studentId),
+                resumeRoundCompleted : job.resumeRoundCompleted,
+                firstRound : job.firstRound.includes(studentId),
+                firstRoundCompleted : job.firstRoundCompleted,
+                secondRound : job.secondRound.includes(studentId),
+                secondRoundCompleted : job.secondRoundCompleted,
+                thirdRound : job.thirdRound.includes(studentId),
+                thirdRoundCompleted : job.thirdRoundCompleted,
+                fourthRound : job.fourthRound.includes(studentId),
+                fourthRoundCompleted : job.fourthRoundCompleted,
+                finalRound : job.finalRound.includes(studentId),
+                finalRoundCompleted : job.finalRoundCompleted
+            }
+            return {
+                jobTrackerID : job._id,
+                jobID:job.jobDetails._id,
+                jobDetails : job.jobDetails,
+                studentInRounds,
+
+            }
+        })
+
+        res.status(200).json({result,student});
+
+        } catch (error) {
+            
+        }
+
+        
+
+
+
+}
+
+export{
+    selectRound,
+    getJobTrackerDetails,
+    createJobTrackor,
+    trackOneStudent
+}

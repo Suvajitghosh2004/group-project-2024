@@ -27,6 +27,7 @@ import ProtectedTeacherRouter from './routerProtector/ProtectedTeacherRouter';
 import ApplyJob from './page/studentPages/ApplyJob';
 import AppliedStudentList from './page/teacherPages/AppliedStudentList';
 import SelectRound from './page/dataForPlcaement/SelectRound';
+import SearchByStudentID from './page/dataForPlcaement/SearchByStudentID';
 
 function App() {
   const navigate = useNavigate();
@@ -68,6 +69,7 @@ function App() {
         <Route path="teacher-register" element={<TeacherRegister />} />
         <Route path="teacher-login" element={<TeacherLogin />} />
         <Route path="select-student" element={<SelectRound />} />
+        <Route path="search-by-student-id" element={<SearchByStudentID />} />
       </Route>
 
       {/* Protected Student Dashboard */}
