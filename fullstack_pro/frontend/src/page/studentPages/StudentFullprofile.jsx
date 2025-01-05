@@ -208,16 +208,13 @@ const StudentFullProfile = () => {
           setProfilePic(response?.data?.profilePic)
           setFormData(response?.data)
           setSaving(false)
-          se
           alert("Profile picture updated successfully");
         } else {
-          setSaving(false)
+            setSaving(false)
             alert("Failed to update profile picture");
         }
-        console.log("Response:", response.data);
     } catch (error) {
-      setSaving(false)
-        console.error("Error updating profile picture:", error);
+         setSaving(false)
         alert("An error occurred while updating the profile picture");
     }
 }

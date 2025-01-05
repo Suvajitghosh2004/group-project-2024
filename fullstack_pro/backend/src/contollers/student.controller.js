@@ -11,11 +11,11 @@ dotenv.config();
 
 const updateProfilePic = async (req, res) => {
   try {
-    console.log("Request Body:", req.body);
-    console.log("Request Files:", req.files);
+   // console.log("Request Body:", req.body);
+    //console.log("Request Files:", req.files);
 
     const { id } = req.body;
-    console.log("id = ",id);
+    //console.log("id = ",id);
 
     if (!id) {
       return res.status(400).json({ message: "Student ID is required" });
@@ -25,14 +25,13 @@ const updateProfilePic = async (req, res) => {
       return res.status(400).json({ message: "Profile picture file is required" });
     }
 
-    const profilePicLocalPath = req.files.filePath[0].path;
+    const profilePicLocalPath = req?.files?.filePath[0]?.path;
     
     // Upload to Cloudinary
     const uploadProfilePic = await uploadOnCloudinary(profilePicLocalPath);
-    fs.unlinkSync(profilePicLocalPath);
     
-
     const profilePic = uploadProfilePic.url;
+    fs.unlinkSync(profilePicLocalPath);
 
     console.log("profilePic = ",profilePic);
 
