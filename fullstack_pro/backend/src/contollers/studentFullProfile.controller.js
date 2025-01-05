@@ -30,61 +30,80 @@ const getOneStudentFullProfile = async (req,res) => {
 
 
 const updateStudentFullProfile = async (req, res) => {
-    try {
-      if (!req.body) {
-        return res.status(400).send({ message: "Request body is empty" });
-      }
-      
-      const { studentDetails, tenth, twelfth, graduation, postGraduation } = req.body;
-  
-      // Handle CV upload if it exists
-      let cvUrl = null;
-      if (req.files?.cv) {
-        const cvLocalPath = req.files.cv[0].path; // Get local file path
-        const uploadedCV = await uploadOnCloudinary(cvLocalPath); // Upload the file to Cloudinary
-        cvUrl = uploadedCV?.url; // Get the URL of the uploaded CV
-        // Delete the local file after upload
-       // fs.unlinkSync(cvLocalPath);
-        //fs.unlinkSync(localFilePath);
-      }
-      console.log("Update Payload:", {
-        studentDetails,
-        tenth: JSON.parse(tenth),
-        twelfth: JSON.parse(twelfth),
-        graduation: JSON.parse(graduation),
-        postGraduation: JSON.parse(postGraduation),
-       // cv: cvUrl,
-      });
-      
-  
-      // Update the student's profile in the database
-      const updatedStudent = await StudentFullProfile.findOneAndUpdate(
-        { studentDetails: studentDetails },
-        {
-          $set: {
-            tenth: JSON.parse(tenth), // Parsing the fields
-            twelfth: JSON.parse(twelfth),
-            graduation: JSON.parse(graduation),
-            postGraduation: JSON.parse(postGraduation),
-            ...(cvUrl && { cv: cvUrl }), // If there's a CV URL, add it to the document
-          },
-        },
-        { new: true } // Return the updated document
-      );
-  
-      if (!updatedStudent) {
-        return res.status(404).json({ error: "Student not found" });
-      }
-  
-      res.status(200).json({
-        message: "Student profile updated successfully",
-        data: updatedStudent,
-      });
-    } catch (error) {
-      console.error("Error updating student profile:", error);
-      res.status(500).json({ error: "Internal server error" });
+  try {
+    // Check if the request body is empty
+    if (!req.body) {
+      return res.status(400).json({ message: "Request body is empty" });
     }
-  };
+
+    const { studentDetails, tenth, twelfth, graduation, postGraduation } = req.body;
+
+    // Validate required fields
+    if (!studentDetails) {
+      return res.status(400).json({ message: "Student details are required" });
+    }
+
+    // Safely parse fields only if they are valid JSON strings
+    const parseField = (field, fieldName) => {
+      if (!field) return null; // Skip parsing for null, undefined, or empty values
+      try {
+        return JSON.parse(field);
+      } catch (error) {
+        console.error(`Error parsing field '${fieldName}':`, error);
+        throw new Error(`Invalid JSON for field: ${fieldName}`);
+      }
+    };
+
+    const parsedTenth = parseField(tenth, "tenth");
+    const parsedTwelfth = parseField(twelfth, "twelfth");
+    const parsedGraduation = parseField(graduation, "graduation");
+    const parsedPostGraduation = parseField(postGraduation, "postGraduation");
+
+    // Handle CV upload if it exists
+    let cvUrl = null;
+    if (req.files?.cv) {
+      const cvLocalPath = req.files.cv[0].path;
+      const uploadedCV = await uploadOnCloudinary(cvLocalPath);
+      cvUrl = uploadedCV?.url;
+
+      // Clean up local file after upload (optional)
+       fs.unlinkSync(cvLocalPath);
+    }
+
+    // Prepare the update payload dynamically
+    const updatePayload = {
+      ...(parsedTenth && { tenth: parsedTenth }),
+      ...(parsedTwelfth && { twelfth: parsedTwelfth }),
+      ...(parsedGraduation && { graduation: parsedGraduation }),
+      ...(parsedPostGraduation && { postGraduation: parsedPostGraduation }),
+      ...(cvUrl && { cv: cvUrl }),
+    };
+
+
+    // Update the student's profile in the database
+    const updatedStudent = await StudentFullProfile.findOneAndUpdate(
+      { studentDetails },
+      { $set: updatePayload },
+      { new: true }
+    );
+
+    if (!updatedStudent) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    res.status(200).json({
+      message: "Student profile updated successfully",
+      data: updatedStudent,
+    });
+  } catch (error) {
+    console.error("Error updating student profile:", error);
+    res.status(500).json({ error: error.message || "Internal server error" });
+  }
+};
+
+
+
+
   
 
 

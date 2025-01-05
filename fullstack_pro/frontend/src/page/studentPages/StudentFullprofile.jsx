@@ -17,6 +17,7 @@ const StudentFullProfile = () => {
   const [isProfilePicEdit,setProfilePicEdit] = useState(false);
   const [tempProfilePic,setTempProfilePic] = useState("");
   const [filePath,setFilePath] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     tenth: {
       obtainedMarks: "",
@@ -24,7 +25,6 @@ const StudentFullProfile = () => {
       board: "",
       yearOfPassing: "",
       schoolName: "",
-      ex:"12"
     },
     twelfth: {
       obtainedMarks: "",
@@ -33,7 +33,6 @@ const StudentFullProfile = () => {
       yearOfPassing: "",
       schoolName: "",
       board: "",
-      ex:"12"
     },
     graduation: {
       obtainedCgpa: "",
@@ -41,18 +40,18 @@ const StudentFullProfile = () => {
       percentage: "",
       universityName: "",
       yearOfPassing: "",
-      ex:"12"
     },
     postGraduation: {
       obtainedCgpa: "",
       totalCgpa: "",
       percentage: "",
-      universityName: "",
+      universityName: "Brainware University",
       yearOfPassing: "",
-      ex:"12"
+      
     },
     cv: "",
   });
+  //setFormData(formData.postGraduation.universityName = "Brainware University");
  
   // useEffect(() => {
   //     const token = localStorage.getItem('authToken');
@@ -118,26 +117,32 @@ const StudentFullProfile = () => {
  
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
   
     try {
-      formData.tenth.ex = "sourav";
-      formData.twelfth.ex = "sourav";
-      formData.graduation.ex = "sourav";
-      formData.postGraduation.ex = "sourav";
       const formDataToSend = new FormData();
   
-      // Append objects as strings (if required) or directly
-      formDataToSend.append("studentDetails",studentDetails);
-      formDataToSend.append("tenth", JSON.stringify(formData.tenth)); 
-      formDataToSend.append("twelfth", JSON.stringify(formData.twelfth));
-      formDataToSend.append("graduation", JSON.stringify(formData.graduation));
-      formDataToSend.append("postGraduation", JSON.stringify(formData.postGraduation));
+      // Validate required fields before appending
+      if (!studentDetails) {
+        alert("Student details are required.");
+        setSaving(false);
+        return;
+      }
+  
+      // Append objects as strings
+      formDataToSend.append("studentDetails", studentDetails);
+      if (formData.tenth) formDataToSend.append("tenth", JSON.stringify(formData.tenth));
+      if (formData.twelfth) formDataToSend.append("twelfth", JSON.stringify(formData.twelfth));
+      if (formData.graduation) formDataToSend.append("graduation", JSON.stringify(formData.graduation));
+      if (formData.postGraduation)
+        formDataToSend.append("postGraduation", JSON.stringify(formData.postGraduation));
   
       // Append the CV file only if it exists
       if (formData.cv) {
         formDataToSend.append("cv", formData.cv);
       }
   
+      // Send the request
       const response = await axios.post(
         "/api/student/update/student-full-profile",
         formDataToSend,
@@ -148,13 +153,26 @@ const StudentFullProfile = () => {
         }
       );
   
+      // Handle success
       console.log("Profile updated successfully:", response.data);
+      setStudentProfile(response?.data?.data);
+      setSaving(false);
+      setIsEditable(false);
       alert("Profile updated successfully!");
+  
+      // Reset form (optional)
+      // setFormData({}); // Reset your state to the initial state if required
     } catch (error) {
-      console.error("Error updating profile:", error.response || error.message);
-      alert("Error updating profile. Please try again.");
+      // Handle errors
+      setSaving(false);
+      console.error("Error updating profile:", error.response?.data || error.message);
+  
+      // Show appropriate error message
+      const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+      alert(`Error updating profile: ${errorMessage}`);
     }
   };
+  
   
   
   const handleFileChange = (event) => {
@@ -175,6 +193,7 @@ const StudentFullProfile = () => {
     document.getElementById("fileInput").click();
   };
   async function savePicture() {
+    setSaving(true);
     try {
         const formData = new FormData();
         formData.append('id', studentDetails);
@@ -187,12 +206,17 @@ const StudentFullProfile = () => {
         if (response.status === 200) {
           console.log(response.data);
           setProfilePic(response?.data?.profilePic)
-            alert("Profile picture updated successfully");
+          setFormData(response?.data)
+          setSaving(false)
+          se
+          alert("Profile picture updated successfully");
         } else {
+          setSaving(false)
             alert("Failed to update profile picture");
         }
         console.log("Response:", response.data);
     } catch (error) {
+      setSaving(false)
         console.error("Error updating profile picture:", error);
         alert("An error occurred while updating the profile picture");
     }
@@ -207,11 +231,12 @@ const StudentFullProfile = () => {
     //setTempImage(null); // Discard the uploaded image
     setProfilePicEdit(false); // Hide the save button
   };
+  
 
   return (
     <div className="student-full-profile">
+
       <div className="student-profile-container">
-        {formData?.tenth?.ex || "sdfgh"}
       <div className="student-profile-picture">
       <div className="profile-container" style={{ textAlign: 'center' }}>
       <div
@@ -303,7 +328,7 @@ const StudentFullProfile = () => {
           onClick={() => setIsEditable(!isEditable)}
           className="student-profile-button student-profile-edit-button"
         >
-          {isEditable ? "Save" : "Edit"}
+          {isEditable ? "Cancel" : "Edit"}
         </button>
 
         <form onSubmit={handleSubmit}>
@@ -314,11 +339,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Obtained Marks:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Obtained Marks"
                   value={formData?.tenth?.obtainedMarks || null}
                   onChange={(e) => handleChange(e, "tenth", "obtainedMarks")}
                   className="student-profile-input"
+                  required
                 />
               ) : (
                 <label >{profile?.tenth?.obtainedMarks || null}</label>
@@ -328,11 +354,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Total Marks:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Total Marks"
                   value={formData?.tenth?.totalMarks || null}
                   onChange={(e) => handleChange(e, "tenth", "totalMarks")}
                   className="student-profile-input"
+                  required 
                 />
               ) : (
                 <label >{profile?.tenth?.totalMarks || null}</label>
@@ -347,6 +374,7 @@ const StudentFullProfile = () => {
                   value={formData?.tenth?.board || null}
                   onChange={(e) => handleChange(e, "tenth", "board")}
                   className="student-profile-input"
+                  required
                 />
               ) : (
                 <label >{profile?.tenth?.board || null}</label>
@@ -356,11 +384,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Year of Passing:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Year of Passing"
                   value={formData?.tenth?.yearOfPassing || null}
                   onChange={(e) => handleChange(e, "tenth", "yearOfPassing")}
                   className="student-profile-input"
+                  required
                 />
               ) : (
                 <label >{profile?.tenth?.yearOfPassing || null}</label>
@@ -376,6 +405,7 @@ const StudentFullProfile = () => {
                   onChange={(e) => handleChange(e, "tenth", "schoolName")}
                   className="student-profile-input"
                   disabled={!isEditable}
+                  required
                 />
               ) : (
                 <label >{profile?.tenth?.schoolName || null}</label>
@@ -389,11 +419,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Obtained Marks:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Obtained Marks"
                   value={formData?.twelfth?.obtainedMarks || null}
                   onChange={(e) => handleChange(e, "twelfth", "obtainedMarks")}
                   className="student-profile-input-two-marks"
+                  required
                 />
               ) : (
                 <label >{profile?.twelfth?.obtainedMarks || null}</label>
@@ -403,11 +434,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Total Marks:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Total Marks"
                   value={formData?.twelfth?.totalMarks || null}
                   onChange={(e) => handleChange(e, "twelfth", "totalMarks")}
                   className="student-profile-input-two-marks"
+                  required
                 />
               ) : (
                 <label >{profile?.twelfth?.totalMarks || null}</label>
@@ -424,6 +456,7 @@ const StudentFullProfile = () => {
                   onChange={(e) => handleChange(e, "twelfth", "branch")}
                   className="student-profile-input"
                   disabled={!isEditable}
+                  required
                 />
               ) : (
                 <label >{profile?.twelfth?.branch || null}</label>
@@ -433,11 +466,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Year of Passing:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Year of Passing"
                   value={formData?.twelfth?.yearOfPassing || null}
                   onChange={(e) => handleChange(e, "twelfth", "yearOfPassing")}
                   className="student-profile-input"
+                  required
                 />
               ) : (
                 <label >{profile?.tenth?.yearOfPassing || null}</label>
@@ -453,6 +487,7 @@ const StudentFullProfile = () => {
                   onChange={(e) => handleChange(e, "twelfth", "schoolName")}
                   className="student-profile-input"
                   disabled={!isEditable}
+                  required
                 />
               ) : (
                 <label >{profile?.tenth?.schoolName || null}</label>
@@ -467,6 +502,7 @@ const StudentFullProfile = () => {
                   value={formData?.twelfth?.board || null}
                   onChange={(e) => handleChange(e, "twelfth", "board")}
                   className="student-profile-input"
+                  required
                 />
               ) : (
                 <label >{profile?.twelfth?.board || null}</label>
@@ -480,12 +516,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Obtained CGPA:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Obtained CGPA"
                   value={formData?.graduation?.obtainedCgpa || null}
                   onChange={(e) => handleChange(e, "graduation", "obtainedCgpa")}
                   className="student-profile-input"
-
+                  required
                 />
               ) : (
                 <label >{profile?.graduation?.obtainedCgpa || null}</label>
@@ -495,12 +531,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Total CGPA:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Total CGPA"
                   value={formData?.graduation?.totalCgpa || null}
                   onChange={(e) => handleChange(e, "graduation", "totalCgpa")}
                   className="student-profile-input"
-
+                  required
                 />
               ) : (
                 <label >{profile?.graduation?.totalCgpa || null}</label>
@@ -510,12 +546,12 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Percentage:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Percentage"
                   value={formData?.graduation?.percentage || null}
                   onChange={(e) => handleChange(e, "graduation", "percentage")}
                   className="student-profile-input"
-
+                  required
                 />
               ) : (
                 <label >{profile?.graduation?.percentage || null}</label>
@@ -531,7 +567,7 @@ const StudentFullProfile = () => {
                     value={formData?.graduation?.universityName || null}
                     onChange={(e) => handleChange(e, "graduation", "universityName")}
                     className="student-profile-input"
-
+                    required
                   />
                 ) : (
                   <label >{profile?.graduation?.universityName || null}</label>
@@ -542,15 +578,15 @@ const StudentFullProfile = () => {
               <label className="student-profile-label">Year of Passing:</label>
               {isEditable ? (
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Year of Passing"
-                  value={formData?.graduation?.yearOfPassing || "2025"}
+                  value={formData?.graduation?.yearOfPassing || ""}
                   onChange={(e) => handleChange(e, "graduation", "yearOfPassing")}
                   className="student-profile-input"
-
+                  required
                 />
               ) : (
-                <label >{profile?.graduation?.yearOfPassing || "2025"}</label>
+                <label >{profile?.graduation?.yearOfPassing || ""}</label>
               )}
             </div>
           </fieldset>
@@ -578,12 +614,12 @@ const StudentFullProfile = () => {
                 <label className="student-profile-label">Obtained CGPA:</label>
                 {isEditable ? (
                   <input
-                    type="text"
+                    type="nmber"
                     placeholder="Obtained CGPA"
                     value={formData?.postGraduation?.obtainedCgpa || null}
                     onChange={(e) => handleChange(e, "postGraduation", "obtainedCgpa")}
                     className="student-profile-input"
-
+                    required ={showPostGraduation}
                   />
                 ) : (
                   <label >{profile?.postGraduation?.obtainedCgpa || null}</label>
@@ -593,12 +629,12 @@ const StudentFullProfile = () => {
                 <label className="student-profile-label">Total CGPA:</label>
                 {isEditable ? (
                   <input
-                    type="text"
+                    type="number"
                     placeholder="Total CGPA"
                     value={formData?.postGraduation?.totalCgpa || null}
                     onChange={(e) => handleChange(e, "postGraduation", "totalCgpa")}
                     className="student-profile-input"
-
+                    required ={showPostGraduation}
                   />
                 ) : (
                   <label >{profile?.postGraduation?.totalCgpa || null}</label>
@@ -608,12 +644,12 @@ const StudentFullProfile = () => {
                 <label className="student-profile-label">Percentage:</label>
                 {isEditable ? (
                   <input
-                    type="text"
+                    type="number"
                     placeholder="Percentage"
                     value={formData?.postGraduation?.percentage || null}
                     onChange={(e) => handleChange(e, "postGraduation", "percentage")}
                     className="student-profile-input"
-
+                    required ={showPostGraduation}
                   />
                 ) : (
                   <label >{profile?.postGraduation?.percentage || null}</label>
@@ -623,21 +659,31 @@ const StudentFullProfile = () => {
                 <label className="student-profile-label">Year of Passing:</label>
                 {isEditable ? (
                   <input
-                    type="text"
+                    type="number"
                     placeholder="Year of Passing"
                     value={formData?.postGraduation?.yearOfPassing || null}
                     onChange={(e) => handleChange(e, "postGraduation", "yearOfPassing")}
                     className="student-profile-input"
-
+                    required ={showPostGraduation}
                   />
                 ) : (
                   <label >{profile?.postGraduation?.yearOfPassing || null}</label>
                 )}
+                
+                  <input
+                  type="text"
+                  placeholder="College name"
+                  value={formData?.postGraduation?.universityName  || "Brainware University"}
+                  onChange={(e) => handleChange(e, "postGraduation", "universityName")}
+                  //disabled
+              
+                />
               </div>
             </fieldset>
           )}
 
-          <div className="student-profile-group">
+          {isEditable && (
+            <div className="student-profile-group">
             <label className="student-profile-label">Upload CV</label>
             <input
               type="file"
@@ -646,6 +692,7 @@ const StudentFullProfile = () => {
               name="cv"
             />
           </div>
+          )}
 
 
           {isEditable && (
@@ -655,15 +702,25 @@ const StudentFullProfile = () => {
           )}
         </form>
 
-        <div className="student-profile-group">
+        {isEditable && (
+          <div className="student-profile-group">
           <label className="student-profile-label">Upload CV</label>
 
           {formData.cv && (
             <p>Selected File: {formData.cv.name}</p> // Safely display the file name
           )}
         </div>
+        )}
 
       </div>
+      {saving && (
+        <div className="popup-overlay">
+        <div className="popup-content">
+          <div className="spinner"></div>
+          <span>Saving...</span>
+        </div>
+      </div>
+      )}
     </div>
   );
 };
