@@ -22,10 +22,39 @@ const uploadOnCloudinary = async (localFilePath) => {
         console.log("File upload successfull url is = ",response.url);
         return response;
     } catch (error) {
-       // fs.unlinkSync(localFilePath);
+       fs.unlinkSync(localFilePath);
        console.log("Error while uploading file on cloudinary = ",error);
         return null;
     }
 }
 
-export {uploadOnCloudinary}
+const deleteFileFromCloudinary = async (publicId) => {
+    if (!publicId) {
+      return { status: 400, message: 'Public ID is required.' };
+    }
+  
+    // Regular expression to validate public ID format (alphanumeric with dashes/underscores)
+    const validPublicIdRegex = /^[a-zA-Z0-9_-]+$/;
+  
+    if (!validPublicIdRegex.test(publicId)) {
+      return { status: 400, message: 'Invalid Public ID format.' };
+    }
+  
+    try {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.destroy(publicId, (error, result) => {
+          if (error) {
+            reject({ status: 500, message: error.message });
+          } else if (result.result === 'ok') {
+            resolve({ status: 200, message: 'File deleted successfully.' });
+          } else {
+            reject({ status: 400, message: 'Failed to delete file.' });
+          }
+        });
+      });
+    } catch (error) {
+      return { status: 500, message: 'Internal server error.' };
+    }
+};
+  
+export {uploadOnCloudinary,deleteFileFromCloudinary}

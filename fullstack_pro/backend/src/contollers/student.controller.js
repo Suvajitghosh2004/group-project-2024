@@ -3,7 +3,7 @@ import Student from "../models/student.model.js";
 import Job from "../models/job.model.js";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { uploadOnCloudinary } from "../cloudinary/cloudinary.js";
+import { uploadOnCloudinary,deleteFileFromCloudinary } from "../cloudinary/cloudinary.js";
 import StudentFullProfile from "../models/studentFullProfile.model.js";
 import fs from 'fs'
 import dotenv from "dotenv";
@@ -11,11 +11,7 @@ dotenv.config();
 
 const updateProfilePic = async (req, res) => {
   try {
-   // console.log("Request Body:", req.body);
-    //console.log("Request Files:", req.files);
-
     const { id } = req.body;
-    //console.log("id = ",id);
 
     if (!id) {
       return res.status(400).json({ message: "Student ID is required" });
@@ -25,16 +21,31 @@ const updateProfilePic = async (req, res) => {
       return res.status(400).json({ message: "Profile picture file is required" });
     }
 
-    const profilePicLocalPath = req?.files?.filePath[0]?.path;
+    const profilePicLocalPath = req.files.filePath[0].path;
     
-    // Upload to Cloudinary
+    // Fetch the student to check if a profile picture already exists
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // If a profilePic already exists, delete it from Cloudinary
+    if (student.profilePic) {
+      const publicId = student.profilePic.split('/').pop().split('.')[0];  // Extract public_id from the URL
+      const deleteResult = await deleteFileFromCloudinary(publicId);
+      if (deleteResult.status !== 200) {
+        return res.status(deleteResult.status).json({ message: deleteResult.message });
+      }
+    }
+
+    // Upload the new profile picture to Cloudinary
     const uploadProfilePic = await uploadOnCloudinary(profilePicLocalPath);
-    
     const profilePic = uploadProfilePic.url;
+
+    // Delete the local profile picture file after upload
     fs.unlinkSync(profilePicLocalPath);
 
-    console.log("profilePic = ",profilePic);
-
+    // Update the student's profile picture in the database
     const updatedStudent = await Student.findByIdAndUpdate(
       id,
       { profilePic },
