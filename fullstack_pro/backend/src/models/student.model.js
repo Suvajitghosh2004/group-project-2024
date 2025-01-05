@@ -28,6 +28,9 @@ const studentSchema = new Schema(
             type: String,
             required:true
         },
+        profilePic:{
+            type:String
+        },
         "appliedJobs": [ // New field for job IDs
             {
                 type: Schema.Types.ObjectId,

@@ -3,9 +3,61 @@ import Student from "../models/student.model.js";
 import Job from "../models/job.model.js";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-
+import { uploadOnCloudinary } from "../cloudinary/cloudinary.js";
+import StudentFullProfile from "../models/studentFullProfile.model.js";
+import fs from 'fs'
 import dotenv from "dotenv";
 dotenv.config();
+
+const updateProfilePic = async (req, res) => {
+  try {
+    console.log("Request Body:", req.body);
+    console.log("Request Files:", req.files);
+
+    const { id } = req.body;
+    console.log("id = ",id);
+
+    if (!id) {
+      return res.status(400).json({ message: "Student ID is required" });
+    }
+
+    if (!req.files?.filePath) {
+      return res.status(400).json({ message: "Profile picture file is required" });
+    }
+
+    const profilePicLocalPath = req.files.filePath[0].path;
+    
+    // Upload to Cloudinary
+    const uploadProfilePic = await uploadOnCloudinary(profilePicLocalPath);
+    fs.unlinkSync(profilePicLocalPath);
+    
+
+    const profilePic = uploadProfilePic.url;
+
+    console.log("profilePic = ",profilePic);
+
+    const updatedStudent = await Student.findByIdAndUpdate(
+      id,
+      { profilePic },
+      { new: true }
+    );
+
+    if (!updatedStudent) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    return res.status(200).json({
+      message: "Profile picture updated successfully",
+      data: updatedStudent,
+    });
+  } catch (error) {
+    console.error("Error updating student profile:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 
 
 const registerStudent = async(req,res) => {
@@ -38,10 +90,18 @@ const registerStudent = async(req,res) => {
         const hashedPassword = await bcrypt.hash(password, 10);      
         const student = await Student.create({studentName,password:hashedPassword,studentCode,contactNumber,
              studentMail,studentStream});
-
-             res.status(201).json(student);
+        if(student){
+          
+            const readyStudentFullProfile = new StudentFullProfile(
+              {studentDetails:student._id},
+              
+            );
+            await readyStudentFullProfile.save();
+        }
+        
+        res.status(201).json(student);
     } catch (error) {
-        res.status(400).json({error: error.message})
+        return res.status(400).json({error: error.message})
     }
 
 }
@@ -281,4 +341,4 @@ const getStudentDetails = async (req, res) => {
 };
 
 
-export {registerStudent,loginStudent,applyForJob,getAppliedJobs,getStudentDetails};
+export {registerStudent,loginStudent,applyForJob,getAppliedJobs,getStudentDetails,updateProfilePic};

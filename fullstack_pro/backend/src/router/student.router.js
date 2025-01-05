@@ -1,6 +1,6 @@
 import { Router } from "express";
 const router = Router();
-import { registerStudent,loginStudent,applyForJob,getAppliedJobs ,getStudentDetails} from "../contollers/student.controller.js";
+import { registerStudent,loginStudent,applyForJob,getAppliedJobs ,getStudentDetails,updateProfilePic} from "../contollers/student.controller.js";
 import {createStudentFullProfile,getOneStudentFullProfile,updateStudentFullProfile} from '../contollers/studentFullProfile.controller.js'
 //router.get('/login', (req,res) =>{
    // res.send("welcome to student login page");
@@ -19,10 +19,20 @@ router.route('/update/student-full-profile').post(
        { name: "cv", maxCount: 1 },
    ]),
    (req, res, next) => {
+    
        next();
    },
    updateStudentFullProfile
 );
+router.route('/update/profile-pic').post(
+    upload.fields([
+        { name: "filePath", maxCount: 1 },
+    ]),
+    (req, res, next) => {
+        next();
+    },
+    updateProfilePic
+ );
 
 
 export default router;

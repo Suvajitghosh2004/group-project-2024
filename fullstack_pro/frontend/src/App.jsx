@@ -72,7 +72,7 @@ function App() {
         <Route path="teacher-login" element={<TeacherLogin />} />
         <Route path="select-student" element={<SelectRound />} />
         <Route path="search-by-student-id" element={<SearchByStudentID />} />
-        <Route path="student-full-profile" element={<StudentFullProfile/>} />
+        
       </Route>
 
       {/* Protected Student Dashboard */}
@@ -90,6 +90,7 @@ function App() {
         <Route path='show-one-job/:id' element={<StudentShowOneJob/>}/>
         <Route path="apply-job/:id" element={<ApplyJob/>} />
         <Route path="applied-job-track/:id" element={<AppliedJobTrack/>} />
+        <Route path="student-full-profile/:studentDetails" element={<StudentFullProfile/>} />
       </Route>
 
         <Route path="/teacher-dashboard" 

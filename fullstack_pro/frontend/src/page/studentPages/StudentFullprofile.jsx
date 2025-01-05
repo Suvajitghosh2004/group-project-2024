@@ -1,20 +1,30 @@
 import React, { useEffect, useState } from "react";
 import "./StudentFullProfile.css";
+
 import axios from "axios";
 import jwt_decode from "jwt-decode";
+import { useParams } from "react-router-dom";
 
 const StudentFullProfile = () => {
+ const {studentDetails} = useParams();
+ // const studentDetails = "673f838dadaf5ae614a38ded";//
+  //const[studentDetails,set] =useState("673f838dadaf5ae614a38ded");
   const [profile, setStudentProfile] = useState(null)
-  const [studentDetails, setStudentDeatils] = useState("673f838dadaf5ae614a38ded")
+  //const [studentDetails, setStudentDeatils] = useState("673f838dadaf5ae614a38ded")
+  const [student,setStudent] = useState(null)
   const [error, setError] = useState(null)
+  const [profilePic,setProfilePic] = useState("http://res.cloudinary.com/dvaxphsns/image/upload/v1736013201/of9a2r1bqatqyxbudf4t.jpg");
+  const [isProfilePicEdit,setProfilePicEdit] = useState(false);
+  const [tempProfilePic,setTempProfilePic] = useState("");
+  const [filePath,setFilePath] = useState(null);
   const [formData, setFormData] = useState({
-    studentDetails: "",
     tenth: {
       obtainedMarks: "",
       totalMarks: "",
       board: "",
       yearOfPassing: "",
       schoolName: "",
+      ex:"12"
     },
     twelfth: {
       obtainedMarks: "",
@@ -23,6 +33,7 @@ const StudentFullProfile = () => {
       yearOfPassing: "",
       schoolName: "",
       board: "",
+      ex:"12"
     },
     graduation: {
       obtainedCgpa: "",
@@ -30,6 +41,7 @@ const StudentFullProfile = () => {
       percentage: "",
       universityName: "",
       yearOfPassing: "",
+      ex:"12"
     },
     postGraduation: {
       obtainedCgpa: "",
@@ -37,9 +49,11 @@ const StudentFullProfile = () => {
       percentage: "",
       universityName: "",
       yearOfPassing: "",
+      ex:"12"
     },
     cv: "",
   });
+ 
   // useEffect(() => {
   //     const token = localStorage.getItem('authToken');
   //     if (token) {
@@ -65,6 +79,8 @@ const StudentFullProfile = () => {
         const response = await axios.post("/api/student/get/one-student-full-profile", { studentDetails })
         if (response) {
           setStudentProfile(response.data)
+          setStudent(response?.data?.studentDetails);
+          setProfilePic(response?.data?.studentDetails?.profilePic)
         }
       } catch (error) {
         console.log(error);
@@ -104,10 +120,14 @@ const StudentFullProfile = () => {
     e.preventDefault();
   
     try {
+      formData.tenth.ex = "sourav";
+      formData.twelfth.ex = "sourav";
+      formData.graduation.ex = "sourav";
+      formData.postGraduation.ex = "sourav";
       const formDataToSend = new FormData();
   
       // Append objects as strings (if required) or directly
-      formDataToSend.append("studentDetails", formData.studentDetails);
+      formDataToSend.append("studentDetails",studentDetails);
       formDataToSend.append("tenth", JSON.stringify(formData.tenth)); 
       formDataToSend.append("twelfth", JSON.stringify(formData.twelfth));
       formDataToSend.append("graduation", JSON.stringify(formData.graduation));
@@ -137,12 +157,147 @@ const StudentFullProfile = () => {
   };
   
   
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setFilePath(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setTempProfilePic(reader.result); // Set the selected image
+       
+      };
+      reader.readAsDataURL(file);
+     // setFilePath(reader.readAsDataURL(file));
+      setProfilePicEdit(true);
+    }
+  };
+  const triggerFileInput = () => {
+    document.getElementById("fileInput").click();
+  };
+  async function savePicture() {
+    try {
+        const formData = new FormData();
+        formData.append('id', studentDetails);
+        formData.append('filePath', filePath);
 
+        const response = await axios.post("/api/student/update/profile-pic", formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        if (response.status === 200) {
+          console.log(response.data);
+          setProfilePic(response?.data?.profilePic)
+            alert("Profile picture updated successfully");
+        } else {
+            alert("Failed to update profile picture");
+        }
+        console.log("Response:", response.data);
+    } catch (error) {
+        console.error("Error updating profile picture:", error);
+        alert("An error occurred while updating the profile picture");
+    }
+}
+
+  const handleSave = () => {
+    savePicture();
+    setProfilePicEdit(false); // Hide the save button
+  };
+  const handleCancel = () => {
+    setTempProfilePic("");
+    //setTempImage(null); // Discard the uploaded image
+    setProfilePicEdit(false); // Hide the save button
+  };
 
   return (
     <div className="student-full-profile">
       <div className="student-profile-container">
-        <h1 className="student-profile-title">Student Full Profile Form</h1>
+        {formData?.tenth?.ex || "sdfgh"}
+      <div className="student-profile-picture">
+      <div className="profile-container" style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          position: 'relative',
+          width: '150px',
+          height: '150px',
+          margin: 'auto',
+        }}
+      >
+        <img
+          src={tempProfilePic ||profilePic}
+          alt="Profile"
+          className="profile-pic"
+          style={{
+            borderRadius: '50%',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            border: '2px solid #ccc',
+          }}
+        />
+        <button
+          onClick={triggerFileInput}
+          className="edit-btn"
+          style={{
+            position: 'absolute',
+            top: '5px',
+            right: '5px',
+            background: 'white',
+            borderRadius: '50%',
+            padding: '5px',
+            cursor: 'pointer',
+            border: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+          }}
+        >
+          ✏️
+        </button>
+        <input
+          id="fileInput"
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+      </div>
+      {isProfilePicEdit && (
+        <div style={{ marginTop: '10px' }}>
+          <button
+            onClick={handleSave}
+            style={{
+              padding: '5px 10px',
+              background: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              marginRight: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            Save
+          </button>
+          <button
+            onClick={handleCancel}
+            style={{
+              padding: '5px 10px',
+              background: '#f44336',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+    </div>
+      </div>
+      <div className="student-info">
+        <p>Name :{student?.studentName || ''}</p>
+        <p>Student Code : {student?.studentCode || ''}</p>
+        <p>Stream: {student?.studentCode || ''}</p>
+      </div>
+        <h1 className="student-profile-title"></h1>
         <button
           type="button"
           onClick={() => setIsEditable(!isEditable)}

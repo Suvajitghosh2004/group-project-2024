@@ -146,6 +146,9 @@ legend {
 .post-graduate-show{
   margin: 15px;
 }
+.student-info{
+  display: flex;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {

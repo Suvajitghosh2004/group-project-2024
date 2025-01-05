@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from "dotenv";
 dotenv.config();
 
+    
 
 const registerTeacher = async (req, res) => {
     const { teacherName, teacherMail, teacherDepatment, teacherPassword } = req.body;

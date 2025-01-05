@@ -17,7 +17,7 @@ const createStudentFullProfile = async (req,res) => {
 const getOneStudentFullProfile = async (req,res) => {
      try {
         const {studentDetails} = req.body;
-        const studentFullProfile = await StudentFullProfile.findOne({studentDetails});
+        const studentFullProfile = await StudentFullProfile.findOne({studentDetails}).populate("studentDetails");
         if(!studentFullProfile) {
             return res.status(404).json({message: "Student Full Profile Not Found"})
         }
@@ -31,6 +31,10 @@ const getOneStudentFullProfile = async (req,res) => {
 
 const updateStudentFullProfile = async (req, res) => {
     try {
+      if (!req.body) {
+        return res.status(400).send({ message: "Request body is empty" });
+      }
+      
       const { studentDetails, tenth, twelfth, graduation, postGraduation } = req.body;
   
       // Handle CV upload if it exists
@@ -40,9 +44,18 @@ const updateStudentFullProfile = async (req, res) => {
         const uploadedCV = await uploadOnCloudinary(cvLocalPath); // Upload the file to Cloudinary
         cvUrl = uploadedCV?.url; // Get the URL of the uploaded CV
         // Delete the local file after upload
-        fs.unlinkSync(cvLocalPath);
+       // fs.unlinkSync(cvLocalPath);
         //fs.unlinkSync(localFilePath);
       }
+      console.log("Update Payload:", {
+        studentDetails,
+        tenth: JSON.parse(tenth),
+        twelfth: JSON.parse(twelfth),
+        graduation: JSON.parse(graduation),
+        postGraduation: JSON.parse(postGraduation),
+       // cv: cvUrl,
+      });
+      
   
       // Update the student's profile in the database
       const updatedStudent = await StudentFullProfile.findOneAndUpdate(

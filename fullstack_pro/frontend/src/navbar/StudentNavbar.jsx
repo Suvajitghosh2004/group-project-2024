@@ -11,6 +11,7 @@ const StudentNavbar = () => {
   const [showDropDown, setDropDown] = useState(false);
   const [stream, setStream] = useState("");
   const [studentCode, setStudentCode] = useState("");
+  const [studentDetails ,setStudentDetails] = useState("");
 
   const profileRef = useRef(null); // Reference for the profile container
 
@@ -19,6 +20,7 @@ const StudentNavbar = () => {
     if (token) {
       try {
         const decodedToken = jwt_decode(token);
+        setStudentDetails(decodedToken.id);
         setName(decodedToken.studentName);
         setStream(decodedToken.studentStream);
         setStudentCode(decodedToken.studentCode);
@@ -56,6 +58,10 @@ const StudentNavbar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  function profile (){
+    navigate(`/student-dashboard/student-full-profile/${studentDetails}`);
+  }
 
   return (
     <nav className="navbar-student">
@@ -126,6 +132,7 @@ const StudentNavbar = () => {
               <p>Name: {name}</p>
               <p>Stream: {stream}</p>
               <p>{studentCode}</p>
+              <button onClick={profile}>Profile</button>
               <button onClick={logout}>Logout</button>
             </div>
           )}
