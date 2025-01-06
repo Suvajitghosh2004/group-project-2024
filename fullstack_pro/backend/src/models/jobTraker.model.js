@@ -5,7 +5,8 @@ const jobTrackerSchema = new Schema(
     {
         "jobId" : {
             type: String,
-            required: true
+            required: true,
+            unique: true
         },
         "password" : {
             type: String,
@@ -13,7 +14,8 @@ const jobTrackerSchema = new Schema(
         },
         "jobDetails" : {
             type : Schema.Types.ObjectId,
-            ref: "Job"
+            ref: "Job",
+            unique:true
         },
         "resumeSelect" : [ 
             {

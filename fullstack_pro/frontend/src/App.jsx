@@ -30,6 +30,7 @@ import SelectRound from './page/dataForPlcaement/SelectRound';
 import SearchByStudentID from './page/dataForPlcaement/SearchByStudentID';
 import AppliedJobTrack from './page/studentPages/AppliedJobTrack';
 import StudentFullProfile from './page/studentPages/StudentFullprofile';
+import JobLogin from './page/jobPages/JobLogin';
 
 function App() {
   const navigate = useNavigate();
@@ -70,8 +71,9 @@ function App() {
         <Route path="student-register" element={<StudentRegister />} />
         <Route path="teacher-register" element={<TeacherRegister />} />
         <Route path="teacher-login" element={<TeacherLogin />} />
-        <Route path="select-student" element={<SelectRound />} />
+        <Route path="/job-login/select-student/:jobTrackerId" element={<SelectRound />} />
         <Route path="search-by-student-id" element={<SearchByStudentID />} />
+        <Route path="job-login" element={<JobLogin/>} />
         
       </Route>
 

@@ -93,28 +93,47 @@ const getJobTrackerDetails = async (req, res) => {
     }
 };
 
-const createJobTrackor  = async (req, res) => {
+const createJobTrackor = async (req, res) => {
     const { jobId, password, jobDetails } = req.body;
-
+  
     try {
-        // Create a new JobTracker instance
-        const newJobTracker = new JobTracker({
-            jobId,
-            password,
-            jobDetails
-        });
-
-        // Save the JobTracker to the database
-        await newJobTracker.save();
-
-        // Return a success response
-        res.status(201).json({ message: 'Job Tracker added successfully!', data: newJobTracker });
+      const jobTracker = await JobTracker.findOne({ jobDetails });
+      if (jobTracker) {
+        return res.status(400).json({message: "Job tracker already exists."});
+      }
+  
+      // Create and save new JobTracker
+      const newJobTracker = new JobTracker({
+        jobId,
+        password,
+        jobDetails
+      });
+  
+      await newJobTracker.save();
+  
+      res.status(201).json({ message: 'Job Tracker added successfully!', data: newJobTracker });
+  
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error saving Job Tracker', error: error.message });
+      console.error(error);
+      res.status(500).json({ message: 'Error saving Job Tracker', error: error.message });
+    }
+  };
+  
+const logInJobTracker = async (req, res) => {
+    const { jobId, password } = req.body;
+    if(!password) return res.status(401).json({ message: "Password is required" });
+    if(!jobId) return res.status(401).json({ message: "Job ID is required" });
+
+    try{
+        const response = await JobTracker.findOne({ jobId});
+        if(!response) return res.status(400).json({ message: "Invalid Job ID" });
+        if(response.password !== password) return res.status(400).json({ message: "Invalid Password"});
+        res.status(201).json(response);
+
+    }catch (error) {
+        return res.status(500).json({ message: "Error logging in JobTracker", error: error.message})
     }
 }
-
 
 const trackOneStudent = async (req,res) => {
     const {studentCode} = req.body;
@@ -211,6 +230,8 @@ const trackOneJob = async (req, res) => {
     }
 };
 
+
+
 const trackJob = async (req, res) => {
     const { jobDetails } = req.body;
     // Validate input
@@ -241,5 +262,6 @@ export{
     createJobTrackor,
     trackOneStudent,
     trackOneJob,
-    trackJob
+    trackJob,
+    logInJobTracker
 }
