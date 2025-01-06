@@ -114,12 +114,12 @@ const StudentNavbar = () => {
           </li>
           <li>
             <NavLink
-              to="/place-student"
+              to="/student-dashboard/placed-students"
               className={({ isActive }) =>
                 isActive ? "active-link-student-navbar" : ""
               }
             >
-              Placed Student
+              Placed Students
             </NavLink>
           </li>
         </ul>

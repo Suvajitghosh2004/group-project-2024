@@ -231,7 +231,6 @@ const trackOneJob = async (req, res) => {
 };
 
 
-
 const trackJob = async (req, res) => {
     const { jobDetails } = req.body;
     // Validate input
@@ -256,6 +255,32 @@ const trackJob = async (req, res) => {
     }
 }
 
+const finalRoundSelectStudent = async (req, res) => {
+    
+    try {
+        const jobTrackers = await JobTracker.find()
+        .populate({
+            path: 'finalRound',
+            select: 'studentName studentStream profilePic'
+        })
+        .populate({
+            path: "jobDetails",
+            select: 'companyName jobRole salary'
+        });
+        const finalRoundStudents = jobTrackers
+        .filter(jobTrack => jobTrack.finalRound.length > 0)
+        .map(jobTrack => ({
+            jobDetails : jobTrack.jobDetails,
+            slecetedStudent : jobTrack.finalRound
+        }))
+        
+        return res.status(200).json(finalRoundStudents);
+        
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 export{
     selectRound,
     getJobTrackerDetails,
@@ -263,5 +288,6 @@ export{
     trackOneStudent,
     trackOneJob,
     trackJob,
-    logInJobTracker
+    logInJobTracker,
+    finalRoundSelectStudent
 }

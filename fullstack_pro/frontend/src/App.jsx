@@ -31,7 +31,7 @@ import SearchByStudentID from './page/dataForPlcaement/SearchByStudentID';
 import AppliedJobTrack from './page/studentPages/AppliedJobTrack';
 import StudentFullProfile from './page/studentPages/StudentFullprofile';
 import JobLogin from './page/jobPages/JobLogin';
-
+import PlacedStudents from './page/dataForPlcaement/PlacedStudents';
 function App() {
   const navigate = useNavigate();
 
@@ -74,7 +74,6 @@ function App() {
         <Route path="/job-login/select-student/:jobTrackerId" element={<SelectRound />} />
         <Route path="search-by-student-id" element={<SearchByStudentID />} />
         <Route path="job-login" element={<JobLogin/>} />
-        
       </Route>
 
       {/* Protected Student Dashboard */}
@@ -93,6 +92,7 @@ function App() {
         <Route path="apply-job/:id" element={<ApplyJob/>} />
         <Route path="applied-job-track/:id" element={<AppliedJobTrack/>} />
         <Route path="student-full-profile/:studentDetails" element={<StudentFullProfile/>} />
+        <Route path="placed-students" element={<PlacedStudents />} />
       </Route>
 
         <Route path="/teacher-dashboard" 
